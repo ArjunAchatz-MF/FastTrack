@@ -4,8 +4,12 @@ import android.content.Context;
 import android.example.com.popularmovies.Model.Movie;
 import android.example.com.popularmovies.Model.Movies;
 import android.example.com.popularmovies.R;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +19,13 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.GlideBitmapDrawable;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.ViewTarget;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 
 import static android.example.com.popularmovies.Controller.NetworkUtils.*;
 
@@ -45,6 +56,7 @@ public class MovieGridAdapter extends RecyclerView.Adapter<MovieGridAdapter.Movi
 
     @Override
     public int getItemCount() {
+        Log.v("MOVIE LIST SIZE", mMovies.mMoviesList.size() + "");
         return mMovies.mMoviesList.size();
     }
 
@@ -53,7 +65,6 @@ public class MovieGridAdapter extends RecyclerView.Adapter<MovieGridAdapter.Movi
         private final Context mContext;
         private RelativeLayout mContainer;
         private ImageView mThumbnail;
-        private Drawable mStarOn, mStarOff, mCurrentDrawable;
 
         public MovieGridElementViewHolder(View itemView, Context context) {
             super(itemView);
@@ -62,8 +73,6 @@ public class MovieGridAdapter extends RecyclerView.Adapter<MovieGridAdapter.Movi
             mThumbnail = (ImageView)itemView.findViewById(R.id.movieThumbnailImageView);
             mContext = context;
 
-            mStarOn = context.getResources().getDrawable(android.R.drawable.star_big_on);
-            mStarOff = context.getResources().getDrawable(android.R.drawable.star_big_off);
         }
 
         public void onBind(Movie movie){
@@ -72,46 +81,91 @@ public class MovieGridAdapter extends RecyclerView.Adapter<MovieGridAdapter.Movi
 
             loadView(movie);
 
-            setOnClicks();
+//            setOnClicks();
+
+            Log.v("BINDING MOVIE", movie.mPosterPath);
 
         }
 
-        private void loadView(Movie movie) {
-            if(!movie.mLocalPosterPath.isEmpty()){
+        private void loadView(final Movie movie) {
 
-            } else if(!movie.mPosterPath.isEmpty()) {
+            String posterLocalPath = mContext.getFilesDir() + "/Posters" + movie.mPosterPath;
+            File posterFile = new File(posterLocalPath);
+
+            File posterDir = new File(mContext.getFilesDir() + "/Posters");
+            if (!posterDir.exists()){
+                posterDir.mkdir();
+            }
+
+            if(posterFile.exists()){
+
+                Glide.with(mContext)
+                        .load(posterLocalPath)
+                        .crossFade()
+                        .into(mThumbnail);
+
+                Log.v("IMAGE LOADED", "LOCALLY");
+
+            } else {
 
                 //Build image request
                 String moviePosterURL = MOVIE_POSTER_URL + movie.mPosterPath;
+
+                ViewTarget viewTarget = new ViewTarget<ImageView, GlideBitmapDrawable>(mThumbnail) {
+
+                    @Override
+                    public void onResourceReady(GlideBitmapDrawable resource, GlideAnimation<? super GlideBitmapDrawable> glideAnimation) {
+                       //Get bitmap
+                        Bitmap posterBitmap = resource.getBitmap();
+
+                        //Set the image
+                        mThumbnail.setImageBitmap(posterBitmap);
+
+                        //Lets save this file out
+                        try {
+                            File poster = new File(mContext.getFilesDir() + "/Posters" + movie.mPosterPath);
+                            if(!poster.exists()) {
+                                FileOutputStream fileOutputStream = new FileOutputStream(poster);
+                                posterBitmap.compress(Bitmap.CompressFormat.JPEG, 75, fileOutputStream);
+                            }
+                            Log.v("POSTER SAVED", "DONE");
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
+                            Log.v("POSTER SAVED", "FAILED");
+                        }
+                    }
+                };
 
                 //Glide it in baby
                 Glide.with(mContext)
                         .load(moviePosterURL)
                         .crossFade()
-                        .into(mThumbnail);
+                        .into(viewTarget);
 
-            } else {
+                Log.v("IMAGE LOADED", "FROM REMOTE");
+
+                //update temp
+                movie.mLocalPosterPath = mContext.getFilesDir() + "/Posters" + movie.mPosterPath;
+                mMovies.mMoviesList.set(getAdapterPosition(), movie);
 
             }
 
         }
 
-        private void setOnClicks() {
-
-            final Movie selectedMovie = mMovies.mMoviesList.get(getAdapterPosition());
-
-            mContainer.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Toast.makeText(
-                            mContext,
-                            mMovies.mMoviesList.get(getAdapterPosition()).mID,
-                            Toast.LENGTH_SHORT
-                    ).show();
-                }
-            });
-
-        }
+//        private void setOnClicks() {
+//
+//            mContainer.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View view) {
+//                    Toast.makeText(
+//                            mContext,
+//                            mMovies.mMoviesList.get(getAdapterPosition()).mID + "",
+//                            Toast.LENGTH_SHORT
+//                    ).show();
+//                }
+//            });
+//
+//        }
 
     }
 

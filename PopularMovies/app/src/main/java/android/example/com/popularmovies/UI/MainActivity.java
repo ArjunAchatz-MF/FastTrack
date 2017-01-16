@@ -25,13 +25,14 @@ public class MainActivity extends AppCompatActivity {
     private static final int NUM_OF_COLUMNS = 2;
     RecyclerView mMoviesRecyclerView;
     MovieGridAdapter mMovieGridAdapter;
-    private Movies mMovies;
+    private volatile Movies mMovies;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //Get the gallery set up
         initializeGallery();
 
         new GetPopularMoviesTask(this).execute();
@@ -50,6 +51,8 @@ public class MainActivity extends AppCompatActivity {
         mMoviesRecyclerView.setAdapter(mMovieGridAdapter);
 
         mMoviesRecyclerView.setLayoutManager(gridLayoutManager);
+
+        mMoviesRecyclerView.setHasFixedSize(false);
     }
 
     @Override
