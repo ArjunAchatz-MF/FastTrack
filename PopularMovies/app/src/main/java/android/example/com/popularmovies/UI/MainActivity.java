@@ -61,16 +61,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.settings_menu, menu);
         return true;
@@ -122,12 +112,15 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            if(mCurrentSelection == SHOWING_TOP_RATED_MOVIES){
-                mMovies = NetworkUtils.getTopRatedMovies(mContext);
-            } else if(mCurrentSelection == SHOWING_POPULAR_MOVIES) {
-                mMovies = NetworkUtils.getPopularMovies(mContext);
-            } else {
-                mMovies = null;
+            switch (mCurrentSelection) {
+                case SHOWING_TOP_RATED_MOVIES :
+                    mMovies = NetworkUtils.getTopRatedMovies(mContext);
+                    break;
+                case SHOWING_POPULAR_MOVIES:
+                    mMovies = NetworkUtils.getPopularMovies(mContext);
+                    break;
+                default:
+                    mMovies = null;
             }
 
             return null;

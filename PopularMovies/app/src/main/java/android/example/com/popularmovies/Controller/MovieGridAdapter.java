@@ -56,7 +56,6 @@ public class MovieGridAdapter extends RecyclerView.Adapter<MovieGridAdapter.Movi
 
     @Override
     public int getItemCount() {
-        Log.v("MOVIE LIST SIZE", mMovies.mMoviesList.size() + "");
         return mMovies.mMoviesList.size();
     }
 
@@ -87,49 +86,13 @@ public class MovieGridAdapter extends RecyclerView.Adapter<MovieGridAdapter.Movi
 
         private void loadView(final Movie movie) {
 
-//            String posterLocalPath = mContext.getFilesDir() + "/Posters" + movie.mPosterPath;
-//            File posterFile = new File(posterLocalPath);
-
-//            File posterDir = new File(mContext.getFilesDir() + "/Posters");
-//            if (!posterDir.exists()){
-//                posterDir.mkdir();
-//            }
-
             String moviePosterURL = MOVIE_POSTER_URL + movie.mPosterPath;
-
-            ViewTarget viewTarget = new ViewTarget<ImageView, GlideBitmapDrawable>(mThumbnail) {
-
-                @Override
-                public void onResourceReady(GlideBitmapDrawable resource, GlideAnimation<? super GlideBitmapDrawable> glideAnimation) {
-                    //Get bitmap
-                    Bitmap posterBitmap = resource.getBitmap();
-
-                    //Set the image
-                    mThumbnail.setImageBitmap(posterBitmap);
-
-                    //Lets save this file out
-                    try {
-                        File poster = new File(mContext.getFilesDir() + "/Posters" + movie.mPosterPath);
-                        if(!poster.exists()) {
-                            FileOutputStream fileOutputStream = new FileOutputStream(poster);
-                            posterBitmap.compress(Bitmap.CompressFormat.JPEG, 75, fileOutputStream);
-                        }
-                        Log.v("POSTER SAVED", "DONE");
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                        Log.v("POSTER SAVED", "FAILED");
-                    }
-                }
-            };
 
             //Glide it in baby
             Glide.with(mContext)
                     .load(moviePosterURL)
                     .crossFade()
-                    .into(viewTarget);
-
-            Log.v("IMAGE LOADED", "FROM REMOTE");
-
+                    .into(mThumbnail);
 
         }
 
