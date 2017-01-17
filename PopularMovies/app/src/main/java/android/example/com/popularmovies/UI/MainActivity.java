@@ -13,6 +13,8 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
@@ -26,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
     RecyclerView mMoviesRecyclerView;
     MovieGridAdapter mMovieGridAdapter;
     private volatile Movies mMovies;
+    private ProgressBar mIndeterminateProgress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +38,9 @@ public class MainActivity extends AppCompatActivity {
         //Get the gallery set up
         initializeGallery();
 
-        new GetPopularMoviesTask(this).execute();
+        mIndeterminateProgress = (ProgressBar)findViewById(R.id.indeterminateProgress);
+
+        new GetMoviesTask(this).execute();
 
     }
 
@@ -81,16 +86,16 @@ public class MainActivity extends AppCompatActivity {
             case R.id.sort_by_most_popular:
                 Toast.makeText(this, "Most popular", Toast.LENGTH_SHORT).show();
                 if(mCurrentSelection != SHOWING_POPULAR_MOVIES){
-                    new GetPopularMoviesTask(this).execute();
                     mCurrentSelection = SHOWING_POPULAR_MOVIES;
+                    new GetMoviesTask(this).execute();
                 }
                 break;
 
             case R.id.sort_by_top_rated:
                 Toast.makeText(this, "Top rated", Toast.LENGTH_SHORT).show();
                 if(mCurrentSelection != SHOWING_TOP_RATED_MOVIES){
-                    new GetTopRatedMoviesTask(this).execute();
                     mCurrentSelection = SHOWING_TOP_RATED_MOVIES;
+                    new GetMoviesTask(this).execute();
                 }
                 break;
 
@@ -100,64 +105,43 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public class GetPopularMoviesTask extends AsyncTask<Void, Void, String>{
+    public class GetMoviesTask extends AsyncTask<Void, Void, Void>{
 
         Context mContext;
 
-        public GetPopularMoviesTask(Context context){
+        public GetMoviesTask(Context context){
             mContext = context;
         }
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            Log.v("STARTING API REQUEST", System.currentTimeMillis() + "");
+            mMoviesRecyclerView.setVisibility(View.GONE);
+            mIndeterminateProgress.setVisibility(View.VISIBLE);
         }
 
         @Override
-        protected String doInBackground(Void... voids) {
-            mMovies = NetworkUtils.getPopularMovies(mContext);
-            Log.v("Number of movies", mMovies.mMoviesList.size() + "");
+        protected Void doInBackground(Void... voids) {
+            if(mCurrentSelection == SHOWING_TOP_RATED_MOVIES){
+                mMovies = NetworkUtils.getTopRatedMovies(mContext);
+            } else if(mCurrentSelection == SHOWING_POPULAR_MOVIES) {
+                mMovies = NetworkUtils.getPopularMovies(mContext);
+            } else {
+                mMovies = null;
+            }
+
             return null;
         }
 
         @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
-            Log.v("DONE API REQUEST", System.currentTimeMillis() + "");
+        protected void onPostExecute(Void v) {
+            super.onPostExecute(v);
+            mMoviesRecyclerView.setVisibility(View.VISIBLE);
             mMovieGridAdapter = new MovieGridAdapter(mMovies);
             mMoviesRecyclerView.setAdapter(mMovieGridAdapter);
+            mIndeterminateProgress.setVisibility(View.GONE);
         }
     }
 
-    public class GetTopRatedMoviesTask extends AsyncTask<Void, Void, String>{
-
-        Context mContext;
-
-        public GetTopRatedMoviesTask(Context context){
-            mContext = context;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            Log.v("STARTING API 2 REQUEST", System.currentTimeMillis() + "");
-        }
-
-        @Override
-        protected String doInBackground(Void... voids) {
-            mMovies = NetworkUtils.getTopRatedMovies(mContext);
-            Log.v("Number of movies", mMovies.mMoviesList.size() + "");
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
-            Log.v("DONE API 2 REQUEST", System.currentTimeMillis() + "");
-            mMovieGridAdapter = new MovieGridAdapter(mMovies);
-            mMoviesRecyclerView.setAdapter(mMovieGridAdapter);
-        }
-    }
 
 }

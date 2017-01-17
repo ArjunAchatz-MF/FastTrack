@@ -81,91 +81,72 @@ public class MovieGridAdapter extends RecyclerView.Adapter<MovieGridAdapter.Movi
 
             loadView(movie);
 
-//            setOnClicks();
-
-            Log.v("BINDING MOVIE", movie.mPosterPath);
+            setOnClicks();
 
         }
 
         private void loadView(final Movie movie) {
 
-            String posterLocalPath = mContext.getFilesDir() + "/Posters" + movie.mPosterPath;
-            File posterFile = new File(posterLocalPath);
+//            String posterLocalPath = mContext.getFilesDir() + "/Posters" + movie.mPosterPath;
+//            File posterFile = new File(posterLocalPath);
 
-            File posterDir = new File(mContext.getFilesDir() + "/Posters");
-            if (!posterDir.exists()){
-                posterDir.mkdir();
-            }
+//            File posterDir = new File(mContext.getFilesDir() + "/Posters");
+//            if (!posterDir.exists()){
+//                posterDir.mkdir();
+//            }
 
-            if(posterFile.exists()){
+            String moviePosterURL = MOVIE_POSTER_URL + movie.mPosterPath;
 
-                Glide.with(mContext)
-                        .load(posterLocalPath)
-                        .crossFade()
-                        .into(mThumbnail);
+            ViewTarget viewTarget = new ViewTarget<ImageView, GlideBitmapDrawable>(mThumbnail) {
 
-                Log.v("IMAGE LOADED", "LOCALLY");
+                @Override
+                public void onResourceReady(GlideBitmapDrawable resource, GlideAnimation<? super GlideBitmapDrawable> glideAnimation) {
+                    //Get bitmap
+                    Bitmap posterBitmap = resource.getBitmap();
 
-            } else {
+                    //Set the image
+                    mThumbnail.setImageBitmap(posterBitmap);
 
-                //Build image request
-                String moviePosterURL = MOVIE_POSTER_URL + movie.mPosterPath;
-
-                ViewTarget viewTarget = new ViewTarget<ImageView, GlideBitmapDrawable>(mThumbnail) {
-
-                    @Override
-                    public void onResourceReady(GlideBitmapDrawable resource, GlideAnimation<? super GlideBitmapDrawable> glideAnimation) {
-                       //Get bitmap
-                        Bitmap posterBitmap = resource.getBitmap();
-
-                        //Set the image
-                        mThumbnail.setImageBitmap(posterBitmap);
-
-                        //Lets save this file out
-                        try {
-                            File poster = new File(mContext.getFilesDir() + "/Posters" + movie.mPosterPath);
-                            if(!poster.exists()) {
-                                FileOutputStream fileOutputStream = new FileOutputStream(poster);
-                                posterBitmap.compress(Bitmap.CompressFormat.JPEG, 75, fileOutputStream);
-                            }
-                            Log.v("POSTER SAVED", "DONE");
-                        } catch (FileNotFoundException e) {
-                            e.printStackTrace();
-                            Log.v("POSTER SAVED", "FAILED");
+                    //Lets save this file out
+                    try {
+                        File poster = new File(mContext.getFilesDir() + "/Posters" + movie.mPosterPath);
+                        if(!poster.exists()) {
+                            FileOutputStream fileOutputStream = new FileOutputStream(poster);
+                            posterBitmap.compress(Bitmap.CompressFormat.JPEG, 75, fileOutputStream);
                         }
+                        Log.v("POSTER SAVED", "DONE");
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                        Log.v("POSTER SAVED", "FAILED");
                     }
-                };
+                }
+            };
 
-                //Glide it in baby
-                Glide.with(mContext)
-                        .load(moviePosterURL)
-                        .crossFade()
-                        .into(viewTarget);
+            //Glide it in baby
+            Glide.with(mContext)
+                    .load(moviePosterURL)
+                    .crossFade()
+                    .into(viewTarget);
 
-                Log.v("IMAGE LOADED", "FROM REMOTE");
+            Log.v("IMAGE LOADED", "FROM REMOTE");
 
-                //update temp
-                movie.mLocalPosterPath = mContext.getFilesDir() + "/Posters" + movie.mPosterPath;
-                mMovies.mMoviesList.set(getAdapterPosition(), movie);
-
-            }
 
         }
 
-//        private void setOnClicks() {
-//
-//            mContainer.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View view) {
-//                    Toast.makeText(
-//                            mContext,
-//                            mMovies.mMoviesList.get(getAdapterPosition()).mID + "",
-//                            Toast.LENGTH_SHORT
-//                    ).show();
-//                }
-//            });
-//
-//        }
+        private void setOnClicks() {
+
+            mContainer.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Toast.makeText(
+                            mContext,
+                            mMovies.mMoviesList.get(getAdapterPosition()).mID + "",
+                            Toast.LENGTH_SHORT
+                    ).show();
+                }
+            });
+
+        }
 
     }
 
