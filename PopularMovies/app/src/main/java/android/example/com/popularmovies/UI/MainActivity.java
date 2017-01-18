@@ -46,18 +46,15 @@ public class MainActivity extends AppCompatActivity {
 
     private void initializeGallery() {
         mMoviesRecyclerView = (RecyclerView)findViewById(R.id.moviesRecyclerView);
-
-        mMovies = new Movies();
-
-        mMovieGridAdapter = new MovieGridAdapter(mMovies);
+        mMoviesRecyclerView.setHasFixedSize(false);
 
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this, NUM_OF_COLUMNS);
-
-        mMoviesRecyclerView.setAdapter(mMovieGridAdapter);
-
         mMoviesRecyclerView.setLayoutManager(gridLayoutManager);
 
-        mMoviesRecyclerView.setHasFixedSize(false);
+        mMovies = new Movies();
+        mMovieGridAdapter = new MovieGridAdapter(mMovies);
+
+        mMoviesRecyclerView.setAdapter(mMovieGridAdapter);
     }
 
     @Override
@@ -133,8 +130,7 @@ public class MainActivity extends AppCompatActivity {
             if(mMovies == null){
                 Toast.makeText(MainActivity.this, "Failed", Toast.LENGTH_SHORT).show();
             } else {
-                mMovieGridAdapter = new MovieGridAdapter(mMovies);
-                mMoviesRecyclerView.setAdapter(mMovieGridAdapter);
+                mMovieGridAdapter.updateDataSet(mMovies);
             }
             mIndeterminateProgress.setVisibility(View.GONE);
         }

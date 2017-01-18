@@ -21,6 +21,7 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.bitmap.GlideBitmapDrawable;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.ViewTarget;
@@ -54,11 +55,17 @@ public class MovieGridAdapter extends RecyclerView.Adapter<MovieGridAdapter.Movi
     @Override
     public void onBindViewHolder(MovieGridElementViewHolder holder, int position) {
         holder.onBind(mMovies.mMoviesList.get(position));
+        Log.v("BOUND POSITION", position + "");
     }
 
     @Override
     public int getItemCount() {
         return mMovies.mMoviesList.size();
+    }
+
+    public void updateDataSet(Movies movies){
+        mMovies = movies;
+        notifyDataSetChanged();;
     }
 
     public class MovieGridElementViewHolder extends RecyclerView.ViewHolder {
@@ -84,7 +91,7 @@ public class MovieGridAdapter extends RecyclerView.Adapter<MovieGridAdapter.Movi
 
         }
 
-        private void loadView(final Movie movie) {
+        private void loadView(Movie movie) {
 
             String moviePosterURL = MOVIE_POSTER_URL + movie.mPosterPath;
 
@@ -92,7 +99,10 @@ public class MovieGridAdapter extends RecyclerView.Adapter<MovieGridAdapter.Movi
             Glide.with(mContext)
                     .load(moviePosterURL)
                     .crossFade()
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .into(mThumbnail);
+
+             Log.v("LOADING", "FROM GLIDE");
 
         }
 
