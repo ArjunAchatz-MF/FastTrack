@@ -1,9 +1,11 @@
 package android.example.com.popularmovies.Controller;
 
 import android.content.Context;
+import android.content.Intent;
 import android.example.com.popularmovies.Model.Movie;
 import android.example.com.popularmovies.Model.Movies;
 import android.example.com.popularmovies.R;
+import android.example.com.popularmovies.UI.DetailsActivity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
@@ -76,11 +78,9 @@ public class MovieGridAdapter extends RecyclerView.Adapter<MovieGridAdapter.Movi
 
         public void onBind(Movie movie){
 
-            Context context = mThumbnail.getContext();
-
             loadView(movie);
 
-            setOnClicks();
+            setOnClicks(movie);
 
         }
 
@@ -96,16 +96,18 @@ public class MovieGridAdapter extends RecyclerView.Adapter<MovieGridAdapter.Movi
 
         }
 
-        private void setOnClicks() {
+        private void setOnClicks(final Movie movie) {
 
             mContainer.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Toast.makeText(
-                            mContext,
-                            mMovies.mMoviesList.get(getAdapterPosition()).mID + "",
-                            Toast.LENGTH_SHORT
-                    ).show();
+                    Intent intent = new Intent(mContext, DetailsActivity.class);
+                    intent.putExtra(Movie.TITLE, movie.mTitle);
+                    intent.putExtra(Movie.PLOT, movie.mPlotSynopsys);
+                    intent.putExtra(Movie.RELEASE_DATE, movie.mReleaseDate);
+                    intent.putExtra(Movie.AVG_RATING, movie.mAverageRating);
+                    intent.putExtra(Movie.POSTER_PATH, movie.mPosterPath);
+                    mContext.startActivity(intent);
                 }
             });
 

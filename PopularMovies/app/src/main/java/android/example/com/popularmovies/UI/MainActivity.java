@@ -130,8 +130,12 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(Void v) {
             super.onPostExecute(v);
             mMoviesRecyclerView.setVisibility(View.VISIBLE);
-            mMovieGridAdapter = new MovieGridAdapter(mMovies);
-            mMoviesRecyclerView.setAdapter(mMovieGridAdapter);
+            if(mMovies == null){
+                Toast.makeText(MainActivity.this, "Failed", Toast.LENGTH_SHORT).show();
+            } else {
+                mMovieGridAdapter = new MovieGridAdapter(mMovies);
+                mMoviesRecyclerView.setAdapter(mMovieGridAdapter);
+            }
             mIndeterminateProgress.setVisibility(View.GONE);
         }
     }
