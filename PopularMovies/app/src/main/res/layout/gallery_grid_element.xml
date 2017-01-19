@@ -2,15 +2,15 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:id="@+id/galleryElementContainer">
 
     <ImageView
         app:srcCompat="@mipmap/ic_launcher"
         android:id="@+id/movieThumbnailImageView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:adjustViewBounds="true"
-        android:scaleType="centerCrop" />
+        android:scaleType="fitXY" />
 
 </RelativeLayout>
