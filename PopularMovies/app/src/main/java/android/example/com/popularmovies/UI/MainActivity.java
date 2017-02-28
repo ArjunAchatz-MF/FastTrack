@@ -1,6 +1,9 @@
 package android.example.com.popularmovies.UI;
 
+import android.app.LoaderManager;
+import android.content.AsyncTaskLoader;
 import android.content.Context;
+import android.content.Loader;
 import android.example.com.popularmovies.Controller.MovieGridAdapter;
 import android.example.com.popularmovies.Controller.NetworkUtils;
 import android.example.com.popularmovies.Model.Movies;
@@ -17,11 +20,13 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+        implements android.support.v4.app.LoaderManager.LoaderCallbacks<Movies> {
 
     public static final int SHOWING_POPULAR_MOVIES = 0;
     public static final int SHOWING_TOP_RATED_MOVIES = 1;
     public static final int SHOWING_FAVOURITE_MOVIES = 2;
+    private static final int GET_MOVIE_TASK = 1232830;
     private int mCurrentSelection = SHOWING_POPULAR_MOVIES;
 
     private static final int NUM_OF_COLUMNS = 2;
@@ -40,7 +45,8 @@ public class MainActivity extends AppCompatActivity {
 
         mIndeterminateProgress = (ProgressBar)findViewById(R.id.indeterminateProgress);
 
-        new GetMoviesTask(this).execute();
+        android.support.v4.app.LoaderManager loaderManager = getSupportLoaderManager();
+        loaderManager.initLoader(GET_MOVIE_TASK, null, this);
 
     }
 
@@ -90,6 +96,67 @@ public class MainActivity extends AppCompatActivity {
 
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public GetMoviesLoaderTask onCreateLoader(int id, Bundle args) {
+        return new GetMoviesLoaderTask(this);
+    }
+
+    @Override
+    public void onLoadFinished(android.support.v4.content.Loader<Movies> loader, Movies data) {
+
+        //Check for errors
+        if(data == null){
+            Toast.makeText(MainActivity.this, "Failed", Toast.LENGTH_SHORT).show();
+            Log.v("LOADING", "FAILED");
+            return;
+        }
+
+        //Set our member variable
+        mMovies = data;
+
+        //Show movie view
+        mMoviesRecyclerView.setVisibility(View.VISIBLE);
+
+        //Update recycler-view adapter
+        mMovieGridAdapter.updateDataSet(mMovies);
+
+        //Hide progress view
+        mIndeterminateProgress.setVisibility(View.GONE);
+
+        Toast.makeText(MainActivity.this, "Movies : " + data.mMoviesList.size(), Toast.LENGTH_SHORT).show();
+        Log.v("LOADING", "SUCCESS");
+    }
+
+    @Override
+    public void onLoaderReset(android.support.v4.content.Loader<Movies> loader) {
+
+    }
+
+    public static class GetMoviesLoaderTask
+            extends android.support.v4.content.AsyncTaskLoader<Movies> {
+
+        Context mContext;
+
+        public GetMoviesLoaderTask(Context context) {
+            super(context);
+            mContext = context;
+        }
+
+        @Override
+        protected void onStartLoading() {
+            super.onStartLoading();
+
+            //Force a load
+            forceLoad();
+        }
+
+        @Override
+        public Movies loadInBackground() {
+            Log.v("LOADING", "BACKGROUND");
+            return NetworkUtils.getTopRatedMovies(mContext);
+        }
     }
 
     public class GetMoviesTask extends AsyncTask<Void, Void, Void>{

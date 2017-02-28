@@ -30,6 +30,8 @@ public class NetworkUtils {
     public static final String API_POINTER = "https://api.themoviedb.org/3";
     public static final String POPULAR_MOVIE_REQUEST = "/movie/popular";
     public static final String TOP_RATED_MOVIE_REQUEST = "/movie/top_rated";
+    public static final String TRAILERS_REQUEST = "/movie/top_rated";
+    public static final String USER_COMMENTS_REQUEST = "/movie/top_rated";
     public static final String API_KEY_QUERY_PARAMETER_KEY = "?api_key=";
     public static final String MOVIE_POSTER_URL = "https://image.tmdb.org/t/p/w185";
 

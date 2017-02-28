@@ -65,7 +65,7 @@ public class MovieGridAdapter extends RecyclerView.Adapter<MovieGridAdapter.Movi
 
     public void updateDataSet(Movies movies){
         mMovies = movies;
-        notifyDataSetChanged();;
+        notifyDataSetChanged();
     }
 
     public class MovieGridElementViewHolder extends RecyclerView.ViewHolder {
