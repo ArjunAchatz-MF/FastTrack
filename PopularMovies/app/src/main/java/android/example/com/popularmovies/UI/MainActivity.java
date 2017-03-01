@@ -4,11 +4,15 @@ import android.app.LoaderManager;
 import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.content.Loader;
+import android.database.Cursor;
+import android.example.com.popularmovies.Controller.FavouritesContentProvider;
 import android.example.com.popularmovies.Controller.MovieGridAdapter;
 import android.example.com.popularmovies.Controller.NetworkUtils;
 import android.example.com.popularmovies.Model.Movies;
 import android.example.com.popularmovies.R;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -19,6 +23,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity
         implements android.support.v4.app.LoaderManager.LoaderCallbacks<Movies> {
@@ -73,14 +79,26 @@ public class MainActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()){
             case R.id.show_favourites:
-                Toast.makeText(this, "Favs", Toast.LENGTH_SHORT).show();
+
+                ArrayList<String> movieIDs = new ArrayList<>();
+
+                Uri movies = FavouritesContentProvider.CONTENT_URI;
+                Cursor c = managedQuery(movies, null, null, null, null);
+                if (c.moveToFirst()) {
+                    do{
+                        String movieID = c.getString(c.getColumnIndex(FavouritesContentProvider.MOVIE_ID));
+                        movieIDs.add(movieID);
+                    } while (c.moveToNext());
+                }
+
+                new GetMoviesTask(this, movieIDs).execute();
                 break;
 
             case R.id.sort_by_most_popular:
                 Toast.makeText(this, "Most popular", Toast.LENGTH_SHORT).show();
                 if(mCurrentSelection != SHOWING_POPULAR_MOVIES){
                     mCurrentSelection = SHOWING_POPULAR_MOVIES;
-                    new GetMoviesTask(this).execute();
+                    new GetMoviesTask(this, null).execute();
                 }
                 break;
 
@@ -88,7 +106,7 @@ public class MainActivity extends AppCompatActivity
                 Toast.makeText(this, "Top rated", Toast.LENGTH_SHORT).show();
                 if(mCurrentSelection != SHOWING_TOP_RATED_MOVIES){
                     mCurrentSelection = SHOWING_TOP_RATED_MOVIES;
-                    new GetMoviesTask(this).execute();
+                    new GetMoviesTask(this, null).execute();
                 }
                 break;
 
@@ -162,9 +180,11 @@ public class MainActivity extends AppCompatActivity
     public class GetMoviesTask extends AsyncTask<Void, Void, Void>{
 
         Context mContext;
+        ArrayList<String> movieIDs;
 
-        public GetMoviesTask(Context context){
+        public GetMoviesTask(Context context, @Nullable ArrayList<String> movieIDs){
             mContext = context;
+            movieIDs = movieIDs;
         }
 
         @Override
@@ -182,6 +202,9 @@ public class MainActivity extends AppCompatActivity
                     break;
                 case SHOWING_POPULAR_MOVIES:
                     mMovies = NetworkUtils.getPopularMovies(mContext);
+                    break;
+                case SHOWING_FAVOURITE_MOVIES:
+                    mMovies = NetworkUtils.getFavouritedMovies(mContext, movieIDs);
                     break;
                 default:
                     mMovies = null;

@@ -162,8 +162,8 @@ public class DetailsActivity extends AppCompatActivity {
                 //Check if this is already favourite
                 boolean found = false;
 
-                Uri students = FavouritesContentProvider.CONTENT_URI;
-                Cursor c = managedQuery(students, null, null, null, "name");
+                Uri movies = FavouritesContentProvider.CONTENT_URI;
+                Cursor c = managedQuery(movies, null, null, null, null);
                 if (c.moveToFirst()) {
                     do{
                         String movieID = c.getString(c.getColumnIndex(FavouritesContentProvider.MOVIE_ID));
@@ -193,8 +193,6 @@ public class DetailsActivity extends AppCompatActivity {
                     Uri uri = getContentResolver().insert(FavouritesContentProvider.CONTENT_URI, values);
 
                     Toast.makeText(getBaseContext(), "Favourited", Toast.LENGTH_SHORT).show();
-
-
 
                 }
             }

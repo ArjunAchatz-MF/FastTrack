@@ -146,12 +146,12 @@ public class FavouritesContentProvider extends ContentProvider {
              * Get all student records
              */
             case FAVOURITE_MOVIE:
-                return "vnd.android.cursor.dir/vnd.example.students";
+                return "android.example.com.popularmovies.Controller.FavouritesContentProvider.favourites";
             /**
              * Get a particular student
              */
             case FAVOURITE_MOVIE_ID:
-                return "vnd.android.cursor.item/vnd.example.students";
+                return "android.example.com.popularmovies.Controller.FavouritesContentProvider.favourites";
             default:
                 throw new IllegalArgumentException("Unsupported URI: " + uri);
         }

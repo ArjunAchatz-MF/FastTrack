@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -218,4 +219,8 @@ public class NetworkUtils {
         return "/movie/" + id + "/reviews";
     }
 
+    public static Movies getFavouritedMovies(Context context, ArrayList<String> movieIDs) {
+
+        return null;
+    }
 }
