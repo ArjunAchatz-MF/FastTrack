@@ -8,6 +8,7 @@ import android.example.com.popularmovies.Model.Reviews;
 import android.example.com.popularmovies.Model.Video;
 import android.example.com.popularmovies.Model.Videos;
 import android.example.com.popularmovies.R;
+import android.net.Uri;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
@@ -22,6 +23,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -247,13 +249,13 @@ public class DetailsActivity extends AppCompatActivity {
 
         @Override
         public VideoViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.review_list_element, parent, false);
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.video_list_element, parent, false);
             return new VideoViewHolder(view);
         }
 
         @Override
         public void onBindViewHolder(VideoViewHolder holder, int position) {
-            holder.bind(mVideos.get(position));
+            holder.bind(position);
         }
 
         @Override
@@ -263,17 +265,27 @@ public class DetailsActivity extends AppCompatActivity {
 
         public class VideoViewHolder extends RecyclerView.ViewHolder {
 
-            public TextView mAuthorTextView, mContentTextView;
+            public RelativeLayout mContainer;
+            public TextView mTrailerTextView;
 
             public VideoViewHolder(View itemView) {
                 super(itemView);
-                mAuthorTextView = (TextView) itemView.findViewById(R.id.reviewAuthorTextView);
-                mContentTextView = (TextView) itemView.findViewById(R.id.reviewContentTextView);
+                mContainer = (RelativeLayout) itemView.findViewById(R.id.trailerContainer);
+                mTrailerTextView = (TextView) itemView.findViewById(R.id.trailerTextView);
             }
 
-            public void bind(Video video){
-                mAuthorTextView.setText(video.mId);
-                mContentTextView.setText(video.mSite);
+            public void bind(final int position){
+                mContainer.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        String k = mVideos.get(position).mKey;
+                        startActivity(new Intent(
+                                Intent.ACTION_VIEW,
+                                Uri.parse("http://www.youtube.com/watch?v=" + k)
+                        ));
+                    }
+                });
+                mTrailerTextView.setText("Trailer " + position);
             }
 
         }

@@ -47,7 +47,7 @@ public class JSONResponseParser {
         try {
 
             video.mId = jsonObject.getString("id");
-            video.mKey = jsonObject.getString("mKey");
+            video.mKey = jsonObject.getString("key");
             video.mName = jsonObject.getString("name");
             video.mSite = jsonObject.getString("site");
             video.mSize = jsonObject.getInt("size");
