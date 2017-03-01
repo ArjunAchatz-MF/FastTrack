@@ -20,6 +20,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".UI.DetailsActivity"></activity>
+        <provider android:name=".Controller.FavouritesContentProvider"
+                  android:authorities="android.example.com.popularmovies.Controller.FavouritesContentProvider"/>
     </application>
 
 </manifest>

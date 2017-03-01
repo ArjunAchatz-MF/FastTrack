@@ -1,6 +1,9 @@
 package android.example.com.popularmovies.UI;
 
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
+import android.example.com.popularmovies.Controller.FavouritesContentProvider;
 import android.example.com.popularmovies.Controller.NetworkUtils;
 import android.example.com.popularmovies.Model.Movie;
 import android.example.com.popularmovies.Model.Review;
@@ -25,6 +28,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 
@@ -50,12 +54,12 @@ public class DetailsActivity extends AppCompatActivity {
         mReviewsRecyclerView = (RecyclerView)findViewById(R.id.reviewsRecyclerView);
         mVideosRecyclerView = (RecyclerView)findViewById(R.id.videoRecyclerView);
 
-        //Set up favourite button
-        setupFavouriteButton();
-
         //Use intent sent over
         Intent intent = getIntent();
         final int movieID = setViewWith(intent);
+
+        //Set up favourite button
+        setupFavouriteButton(movieID + "");
 
         //Set layout managers and Adapters
         RecyclerView.LayoutManager reviewsLayoutManager = new LinearLayoutManager(this);
@@ -150,12 +154,49 @@ public class DetailsActivity extends AppCompatActivity {
 
     }
 
-    private void setupFavouriteButton() {
+    private void setupFavouriteButton(final String id) {
         Button favouriteButton = (Button)findViewById(R.id.favouriteButton);
         favouriteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // TODO set as favourite for offloading ..
+                //Check if this is already favourite
+                boolean found = false;
+
+                Uri students = FavouritesContentProvider.CONTENT_URI;
+                Cursor c = managedQuery(students, null, null, null, "name");
+                if (c.moveToFirst()) {
+                    do{
+                        String movieID = c.getString(c.getColumnIndex(FavouritesContentProvider.MOVIE_ID));
+                        if(movieID.equals(id)){
+                            found = true;
+                            break;
+                        }
+                    } while (c.moveToNext());
+                }
+
+                if(found){
+
+                    //Remove this
+                    getContentResolver().delete(FavouritesContentProvider.CONTENT_URI,
+                            "movie_id=?", new String[]{id});
+
+                    Toast.makeText(getBaseContext(), "Un-favourited", Toast.LENGTH_SHORT).show();
+
+
+                } else {
+
+                    // Add a new student record
+                    ContentValues values = new ContentValues();
+
+                    values.put(FavouritesContentProvider.MOVIE_ID, id);
+
+                    Uri uri = getContentResolver().insert(FavouritesContentProvider.CONTENT_URI, values);
+
+                    Toast.makeText(getBaseContext(), "Favourited", Toast.LENGTH_SHORT).show();
+
+
+
+                }
             }
         });
     }
