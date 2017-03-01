@@ -1,7 +1,10 @@
 package android.example.com.popularmovies.Controller;
 
 import android.example.com.popularmovies.Model.Movie;
-import android.example.com.popularmovies.Model.MovieTrailers;
+import android.example.com.popularmovies.Model.Review;
+import android.example.com.popularmovies.Model.Reviews;
+import android.example.com.popularmovies.Model.Video;
+import android.example.com.popularmovies.Model.Videos;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -38,8 +41,37 @@ public class JSONResponseParser {
         return movie;
     }
 
-    public static MovieTrailers getMovieTrailers(String jsonString){
+    public static Video getVideo(JSONObject jsonObject){
+        Video video = new Video();
 
-        return null;
+        try {
+
+            video.mId = jsonObject.getString("id");
+            video.mKey = jsonObject.getString("mKey");
+            video.mName = jsonObject.getString("name");
+            video.mSite = jsonObject.getString("site");
+            video.mSize = jsonObject.getInt("size");
+            video.mType = jsonObject.getString("type");
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return video;
+    }
+
+    public static Review getReview(JSONObject jsonObject) {
+        Review review = new Review();
+
+        try {
+
+            review.mAuthor = jsonObject.getString("author");
+            review.mContent = jsonObject.getString("content");
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return review;
     }
 }

@@ -112,6 +112,7 @@ public class MovieGridAdapter extends RecyclerView.Adapter<MovieGridAdapter.Movi
                 @Override
                 public void onClick(View view) {
                     Intent intent = new Intent(mContext, DetailsActivity.class);
+                    intent.putExtra(Movie.ID, movie.mID);
                     intent.putExtra(Movie.TITLE, movie.mTitle);
                     intent.putExtra(Movie.PLOT, movie.mPlotSynopsys);
                     intent.putExtra(Movie.RELEASE_DATE, movie.mReleaseDate);

@@ -7,14 +7,14 @@ import java.util.ArrayList;
  * Copyright © 2016 Matter and Form. All rights reserved.
  */
 
-public class MovieTrailers {
+public class Videos {
+    public ArrayList<Video> mVideos;
 
-    public String mID = "";
-
-    public ArrayList<String> mTrailerURLs;
-
-    public MovieTrailers(){
-        mTrailerURLs = new ArrayList<>();
+    public Videos(){
+        mVideos = new ArrayList<>();
     }
 
+    public void addVideo(Video video){
+        mVideos.add(video);
+    }
 }
