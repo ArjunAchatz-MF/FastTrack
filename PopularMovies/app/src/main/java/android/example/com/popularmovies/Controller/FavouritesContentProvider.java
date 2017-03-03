@@ -15,24 +15,36 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 
+import android.example.com.popularmovies.Model.Movie;
 import android.net.Uri;
 import android.text.TextUtils;
 
 public class FavouritesContentProvider extends ContentProvider {
 
+    //Out content provider contract
     public static final String PROVIDER_NAME = "android.example.com.popularmovies.Controller.FavouritesContentProvider";
     public static final String URL = "content://" + PROVIDER_NAME + "/favourites";
     public static final Uri CONTENT_URI = Uri.parse(URL);
 
+    //Enum
     public static final int FAVOURITE_MOVIE = 1;
     public static final int FAVOURITE_MOVIE_ID = 2;
 
+    //Database information
     public static final String DATABASE_NAME = "Popular_Movies_DB";
-    public static final String FAVOURITES_TABLE_NAME = "Favourites";
     private static final int DATABASE_VERSION = 1;
+
+    //Table within sqlite
+    public static final String FAVOURITES_TABLE_NAME = "Favourites";
     public static final String _ID = "_id";
     public static final String MOVIE_ID = "movie_id";
+    public static final String MOVIE_TITLE = "movie_title";
+    public static final String MOVIE_PLOT = "movie_plot";
+    public static final String MOVIE_RELEASE_DATE = "movie_release_date";
+    public static final String MOVIE_POSTER_PATH = "movie_poster_path";
+    public static final String MOVIE_AVG_RATING = "movie_avg_rating";
 
+    //Content provider
     private static HashMap<String, String> FAVOURITEMOVIE_PROJECTION_MAP;
     private static final UriMatcher uriMatcher;
     static {
@@ -45,7 +57,12 @@ public class FavouritesContentProvider extends ContentProvider {
     private static final String CREATE_DB_TABLE =
             " CREATE TABLE " + FAVOURITES_TABLE_NAME +
                     " (_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    " movie_id TEXT NOT NULL);";
+                    " movie_id TEXT NOT NULL," +
+                    " movie_title TEXT NOT NULL," +
+                    " movie_plot TEXT NOT NULL," +
+                    " movie_release_date TEXT NOT NULL," +
+                    " movie_poster_path TEXT NOT NULL," +
+                    " movie_avg_rating REAL NOT NULL);";
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
         DatabaseHelper(Context context){
@@ -141,9 +158,6 @@ public class FavouritesContentProvider extends ContentProvider {
     @Override
     public String getType(Uri uri) {
         switch (uriMatcher.match(uri)){
-            /**
-             * Get all student records
-             */
             case FAVOURITE_MOVIE:
                 return "android.example.com.popularmovies.Controller.FavouritesContentProvider.favourites";
             /**

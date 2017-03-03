@@ -44,6 +44,7 @@ public class DetailsActivity extends AppCompatActivity {
     ReviewsAdapter mReviewsAdapter;
     Reviews mReviews;
     Videos mVideos;
+    private Movie mMovie;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -191,6 +192,11 @@ public class DetailsActivity extends AppCompatActivity {
                     ContentValues values = new ContentValues();
 
                     values.put(FavouritesContentProvider.MOVIE_ID, id);
+                    values.put(FavouritesContentProvider.MOVIE_TITLE, mMovie.mTitle);
+                    values.put(FavouritesContentProvider.MOVIE_PLOT, mMovie.mPlotSynopsys);
+                    values.put(FavouritesContentProvider.MOVIE_POSTER_PATH, mMovie.mPosterPath);
+                    values.put(FavouritesContentProvider.MOVIE_RELEASE_DATE, mMovie.mReleaseDate);
+                    values.put(FavouritesContentProvider.MOVIE_AVG_RATING, mMovie.mAverageRating);
 
                     Uri uri = getContentResolver().insert(FavouritesContentProvider.CONTENT_URI, values);
 
@@ -203,27 +209,29 @@ public class DetailsActivity extends AppCompatActivity {
 
     private int setViewWith(Intent intent) {
         final int movieID = intent.getIntExtra(Movie.ID, -1);
-        String title = intent.getStringExtra(Movie.TITLE);
-        String plot = intent.getStringExtra(Movie.PLOT);
-        String releaseDate = intent.getStringExtra(Movie.RELEASE_DATE);
-        String posterPath = intent.getStringExtra(Movie.POSTER_PATH);
+        mMovie = new Movie();
+        mMovie.mTitle = intent.getStringExtra(Movie.TITLE);
+        mMovie.mPlotSynopsys = intent.getStringExtra(Movie.PLOT);
+        mMovie.mReleaseDate = intent.getStringExtra(Movie.RELEASE_DATE);
+        mMovie.mPosterPath = intent.getStringExtra(Movie.POSTER_PATH);
         String avgRating = intent.getDoubleExtra(Movie.AVG_RATING, 0) + "";
         avgRating = avgRating.length() == 1 ? avgRating : avgRating.substring(0,3);
+        mMovie.mAverageRating = Double.parseDouble(avgRating);
 
         ImageView poster = (ImageView)findViewById(R.id.detailsPosterImageView);
-        Glide.with(this).load(NetworkUtils.MOVIE_POSTER_URL + posterPath).crossFade().into(poster);
+        Glide.with(this).load(NetworkUtils.MOVIE_POSTER_URL + mMovie.mPosterPath).crossFade().into(poster);
 
         TextView titleTV = (TextView)findViewById(R.id.detailsMovieTitle);
-        titleTV.setText(title);
+        titleTV.setText(mMovie.mTitle);
 
         TextView plotTV = (TextView)findViewById(R.id.detailsPlotSynopsys);
-        plotTV.setText(plot);
+        plotTV.setText(mMovie.mPlotSynopsys);
 
         TextView releaseDateTV = (TextView)findViewById(R.id.detailsYear);
-        releaseDateTV.setText(releaseDate.substring(0,4));
+        releaseDateTV.setText(mMovie.mReleaseDate.substring(0,4));
 
         TextView avgRatingTV = (TextView)findViewById(R.id.detailsAvgRating);
-        avgRatingTV.setText(avgRating + "/10");
+        avgRatingTV.setText(mMovie.mAverageRating + "/10");
         return movieID;
     }
 

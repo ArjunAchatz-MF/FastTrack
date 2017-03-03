@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.example.com.popularmovies.Controller.FavouritesContentProvider;
 import android.example.com.popularmovies.Controller.MovieGridAdapter;
 import android.example.com.popularmovies.Controller.NetworkUtils;
+import android.example.com.popularmovies.Model.Movie;
 import android.example.com.popularmovies.Model.Movies;
 import android.example.com.popularmovies.R;
 import android.net.Uri;
@@ -79,19 +80,11 @@ public class MainActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()){
             case R.id.show_favourites:
-
-                ArrayList<String> movieIDs = new ArrayList<>();
-
-                Uri movies = FavouritesContentProvider.CONTENT_URI;
-                Cursor c = managedQuery(movies, null, null, null, null);
-                if (c.moveToFirst()) {
-                    do{
-                        String movieID = c.getString(c.getColumnIndex(FavouritesContentProvider.MOVIE_ID));
-                        movieIDs.add(movieID);
-                    } while (c.moveToNext());
+                Toast.makeText(this, "Your favourites", Toast.LENGTH_SHORT).show();
+                if(mCurrentSelection != SHOWING_FAVOURITE_MOVIES){
+                    mCurrentSelection = SHOWING_FAVOURITE_MOVIES;
+                    new GetMoviesTask(this, null).execute();
                 }
-
-                new GetMoviesTask(this, movieIDs).execute();
                 break;
 
             case R.id.sort_by_most_popular:
@@ -204,7 +197,37 @@ public class MainActivity extends AppCompatActivity
                     mMovies = NetworkUtils.getPopularMovies(mContext);
                     break;
                 case SHOWING_FAVOURITE_MOVIES:
-                    mMovies = NetworkUtils.getFavouritedMovies(mContext, movieIDs);
+                    Uri movies = FavouritesContentProvider.CONTENT_URI;
+                    Cursor c = managedQuery(movies, null, null, null, null);
+                    mMovies = new Movies();
+                    if (c.moveToFirst()) {
+                        do{
+
+                            Movie favouritedMovie = new Movie();
+
+                            favouritedMovie.mID = Integer.parseInt(
+                                    c.getString(c.getColumnIndex(FavouritesContentProvider.MOVIE_ID)));
+
+                            favouritedMovie.mAverageRating =
+                                    c.getDouble(c.getColumnIndex(FavouritesContentProvider.MOVIE_AVG_RATING));
+
+                            favouritedMovie.mPosterPath =
+                                    c.getString(c.getColumnIndex(FavouritesContentProvider.MOVIE_POSTER_PATH));
+
+                            favouritedMovie.mPlotSynopsys =
+                                    c.getString(c.getColumnIndex(FavouritesContentProvider.MOVIE_PLOT));
+
+                            favouritedMovie.mReleaseDate =
+                                    c.getString(c.getColumnIndex(FavouritesContentProvider.MOVIE_RELEASE_DATE));
+
+                            favouritedMovie.mTitle =
+                                    c.getString(c.getColumnIndex(FavouritesContentProvider.MOVIE_TITLE));
+
+                            mMovies.addMovie(favouritedMovie);
+
+                        } while (c.moveToNext());
+                    }
+
                     break;
                 default:
                     mMovies = null;
