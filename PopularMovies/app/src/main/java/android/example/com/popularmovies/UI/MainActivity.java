@@ -173,7 +173,7 @@ public class MainActivity extends AppCompatActivity
         @Override
         public Movies loadInBackground() {
             Log.v("LOADING", "BACKGROUND");
-            return NetworkUtils.getTopRatedMovies(mContext);
+            return NetworkUtils.getPopularMovies(mContext);
         }
     }
 

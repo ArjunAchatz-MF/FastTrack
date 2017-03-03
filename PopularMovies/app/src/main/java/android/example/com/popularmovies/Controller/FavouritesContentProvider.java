@@ -20,30 +20,29 @@ import android.text.TextUtils;
 
 public class FavouritesContentProvider extends ContentProvider {
 
-    static final String PROVIDER_NAME = "android.example.com.popularmovies.Controller.FavouritesContentProvider";
-    static final String URL = "content://" + PROVIDER_NAME + "/favourites";
+    public static final String PROVIDER_NAME = "android.example.com.popularmovies.Controller.FavouritesContentProvider";
+    public static final String URL = "content://" + PROVIDER_NAME + "/favourites";
     public static final Uri CONTENT_URI = Uri.parse(URL);
 
+    public static final int FAVOURITE_MOVIE = 1;
+    public static final int FAVOURITE_MOVIE_ID = 2;
+
+    public static final String DATABASE_NAME = "Popular_Movies_DB";
+    public static final String FAVOURITES_TABLE_NAME = "Favourites";
+    private static final int DATABASE_VERSION = 1;
     public static final String _ID = "_id";
     public static final String MOVIE_ID = "movie_id";
 
     private static HashMap<String, String> FAVOURITEMOVIE_PROJECTION_MAP;
-
-    static final int FAVOURITE_MOVIE = 1;
-    static final int FAVOURITE_MOVIE_ID = 2;
-
-    static final UriMatcher uriMatcher;
-    static{
+    private static final UriMatcher uriMatcher;
+    static {
         uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         uriMatcher.addURI(PROVIDER_NAME, "favourites", FAVOURITE_MOVIE);
         uriMatcher.addURI(PROVIDER_NAME, "favourites/#", FAVOURITE_MOVIE_ID);
     }
 
     private SQLiteDatabase db;
-    static final String DATABASE_NAME = "Popular_Movies_DB";
-    static final String FAVOURITES_TABLE_NAME = "Favourites";
-    static final int DATABASE_VERSION = 1;
-    static final String CREATE_DB_TABLE =
+    private static final String CREATE_DB_TABLE =
             " CREATE TABLE " + FAVOURITES_TABLE_NAME +
                     " (_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     " movie_id TEXT NOT NULL);";

@@ -56,6 +56,8 @@ public class DetailsActivity extends AppCompatActivity {
 
         //Use intent sent over
         Intent intent = getIntent();
+
+        //Use intent data to load views with model
         final int movieID = setViewWith(intent);
 
         //Set up favourite button
