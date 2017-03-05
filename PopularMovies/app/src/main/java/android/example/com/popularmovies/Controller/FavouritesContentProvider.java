@@ -160,9 +160,6 @@ public class FavouritesContentProvider extends ContentProvider {
         switch (uriMatcher.match(uri)){
             case FAVOURITE_MOVIE:
                 return "android.example.com.popularmovies.Controller.FavouritesContentProvider.favourites";
-            /**
-             * Get a particular student
-             */
             case FAVOURITE_MOVIE_ID:
                 return "android.example.com.popularmovies.Controller.FavouritesContentProvider.favourites";
             default:
