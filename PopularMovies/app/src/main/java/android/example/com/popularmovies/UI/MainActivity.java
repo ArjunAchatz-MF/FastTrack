@@ -1,9 +1,6 @@
 package android.example.com.popularmovies.UI;
 
-import android.app.LoaderManager;
-import android.content.AsyncTaskLoader;
 import android.content.Context;
-import android.content.Loader;
 import android.database.Cursor;
 import android.example.com.popularmovies.Controller.FavouritesContentProvider;
 import android.example.com.popularmovies.Controller.MovieGridAdapter;
@@ -34,7 +31,8 @@ public class MainActivity extends AppCompatActivity
     public static final int SHOWING_TOP_RATED_MOVIES = 1;
     public static final int SHOWING_FAVOURITE_MOVIES = 2;
     private static final int GET_MOVIE_TASK = 1232830;
-    private int mCurrentSelection = SHOWING_POPULAR_MOVIES;
+    private static final String CURRENT_SELECTION = "CURRENT_SELECTION";
+    private volatile int mCurrentSelection = SHOWING_POPULAR_MOVIES;
 
     private static final int NUM_OF_COLUMNS = 2;
     RecyclerView mMoviesRecyclerView;
@@ -50,11 +48,32 @@ public class MainActivity extends AppCompatActivity
         //Get the gallery set up
         initializeGallery();
 
+        //Get access to loading view
         mIndeterminateProgress = (ProgressBar)findViewById(R.id.indeterminateProgress);
 
-        android.support.v4.app.LoaderManager loaderManager = getSupportLoaderManager();
-        loaderManager.initLoader(GET_MOVIE_TASK, null, this);
+        //Set rotation state change
+        if(savedInstanceState != null){
+            mCurrentSelection = savedInstanceState.getInt(CURRENT_SELECTION);
+        } else {
+            mCurrentSelection = SHOWING_POPULAR_MOVIES;
+        }
 
+
+
+        android.support.v4.app.LoaderManager loaderManager = getSupportLoaderManager();
+        android.support.v4.content.Loader<Object> loader = loaderManager.getLoader(GET_MOVIE_TASK);
+//        if(loader != null) {
+            loaderManager.restartLoader(GET_MOVIE_TASK, null, this);
+//        } else {
+//            loaderManager.restartLoader(GET_MOVIE_TASK, null, this);
+//        }
+
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putInt(CURRENT_SELECTION, mCurrentSelection);
+        super.onSaveInstanceState(outState);
     }
 
     private void initializeGallery() {
@@ -83,7 +102,7 @@ public class MainActivity extends AppCompatActivity
                 Toast.makeText(this, "Your favourites", Toast.LENGTH_SHORT).show();
                 if(mCurrentSelection != SHOWING_FAVOURITE_MOVIES){
                     mCurrentSelection = SHOWING_FAVOURITE_MOVIES;
-                    new GetMoviesTask(this, null).execute();
+                    new GetMoviesTask(this).execute();
                 }
                 break;
 
@@ -91,7 +110,7 @@ public class MainActivity extends AppCompatActivity
                 Toast.makeText(this, "Most popular", Toast.LENGTH_SHORT).show();
                 if(mCurrentSelection != SHOWING_POPULAR_MOVIES){
                     mCurrentSelection = SHOWING_POPULAR_MOVIES;
-                    new GetMoviesTask(this, null).execute();
+                    new GetMoviesTask(this).execute();
                 }
                 break;
 
@@ -99,7 +118,7 @@ public class MainActivity extends AppCompatActivity
                 Toast.makeText(this, "Top rated", Toast.LENGTH_SHORT).show();
                 if(mCurrentSelection != SHOWING_TOP_RATED_MOVIES){
                     mCurrentSelection = SHOWING_TOP_RATED_MOVIES;
-                    new GetMoviesTask(this, null).execute();
+                    new GetMoviesTask(this).execute();
                 }
                 break;
 
@@ -110,8 +129,69 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public GetMoviesLoaderTask onCreateLoader(int id, Bundle args) {
-        return new GetMoviesLoaderTask(this);
+    public  android.support.v4.content.AsyncTaskLoader<Movies> onCreateLoader(int id, Bundle args) {
+        return new  android.support.v4.content.AsyncTaskLoader<Movies>(this){
+            @Override
+            protected void onStartLoading() {
+                super.onStartLoading();
+
+                //Force a load
+                forceLoad();
+            }
+
+            @Override
+            public Movies loadInBackground() {
+                Log.v("LOADING", "BACKGROUND");
+                Movies movies = new Movies();
+
+                switch (mCurrentSelection){
+                    case SHOWING_FAVOURITE_MOVIES:
+                        Uri moviesURI = FavouritesContentProvider.CONTENT_URI;
+                        Cursor c = managedQuery(moviesURI, null, null, null, null);
+                        if (c.moveToFirst()) {
+                            do{
+
+                                Movie favouritedMovie = new Movie();
+
+                                favouritedMovie.mID = Integer.parseInt(
+                                        c.getString(c.getColumnIndex(FavouritesContentProvider.MOVIE_ID)));
+
+                                favouritedMovie.mAverageRating =
+                                        c.getDouble(c.getColumnIndex(FavouritesContentProvider.MOVIE_AVG_RATING));
+
+                                favouritedMovie.mPosterPath =
+                                        c.getString(c.getColumnIndex(FavouritesContentProvider.MOVIE_POSTER_PATH));
+
+                                favouritedMovie.mPlotSynopsys =
+                                        c.getString(c.getColumnIndex(FavouritesContentProvider.MOVIE_PLOT));
+
+                                favouritedMovie.mReleaseDate =
+                                        c.getString(c.getColumnIndex(FavouritesContentProvider.MOVIE_RELEASE_DATE));
+
+                                favouritedMovie.mTitle =
+                                        c.getString(c.getColumnIndex(FavouritesContentProvider.MOVIE_TITLE));
+
+                                movies.addMovie(favouritedMovie);
+
+                            } while (c.moveToNext());
+
+                            if(c != null && !c.isClosed()){
+                                c.close();
+                            }
+                        }
+                        break;
+                    case SHOWING_POPULAR_MOVIES:
+                        movies = NetworkUtils.getPopularMovies(MainActivity.this);
+                        break;
+                    case SHOWING_TOP_RATED_MOVIES:
+                        movies = NetworkUtils.getTopRatedMovies(MainActivity.this);
+                        break;
+
+                    default:
+                }
+                return movies;
+            }
+        };
     }
 
     @Override
@@ -145,39 +225,12 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    public static class GetMoviesLoaderTask
-            extends android.support.v4.content.AsyncTaskLoader<Movies> {
-
-        Context mContext;
-
-        public GetMoviesLoaderTask(Context context) {
-            super(context);
-            mContext = context;
-        }
-
-        @Override
-        protected void onStartLoading() {
-            super.onStartLoading();
-
-            //Force a load
-            forceLoad();
-        }
-
-        @Override
-        public Movies loadInBackground() {
-            Log.v("LOADING", "BACKGROUND");
-            return NetworkUtils.getPopularMovies(mContext);
-        }
-    }
-
     public class GetMoviesTask extends AsyncTask<Void, Void, Void>{
 
         Context mContext;
-        ArrayList<String> movieIDs;
 
-        public GetMoviesTask(Context context, @Nullable ArrayList<String> movieIDs){
+        public GetMoviesTask(Context context){
             mContext = context;
-            movieIDs = movieIDs;
         }
 
         @Override

@@ -219,8 +219,4 @@ public class NetworkUtils {
         return "/movie/" + id + "/reviews";
     }
 
-    public static Movies getFavouritedMovies(Context context, ArrayList<String> movieIDs) {
-
-        return null;
-    }
 }
